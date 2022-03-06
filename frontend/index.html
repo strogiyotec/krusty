@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Krusty</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script type="text/javascript" src="https://wealthica.github.io/wealthica.js/dist/addon.min.js"></script>
+</head>
+
+<body>
+    <h3>Export your data into EXCEL for free</h3>
+    <p>
+        <button type="button" onclick="getPositions()" id="getTransactions">List
+            Transactions
+    </p>
+
+    <script type="text/javascript">
+        var addon = new Addon();
+        //Addon setup
+        addon.on('init', function (options) {
+            // Dashboard is ready and is signaling to the add-on that it should
+            // render using the passed in options (filters, language, etc.)
+            addonOptions = options;
+        }).on('update', function (options) {
+            // Filters have been updated and Dashboard is passing in updated options
+            addonOptions = _.extend(addonOptions, options);
+        });
+
+
+        //Get list of purchased stocks 
+        function getPositions() {
+            addon.api.getPositions(getQueryFromOptions(addonOptions)).then(function (positions) {
+                //Krusty doesn't care about most fields
+                //For now it's only fetches ticket with amount of stocks
+                let stocks = [];
+                positions.forEach(function (position) {
+                    let stock = {}
+                    stock.quantity = position.quantity;
+                    stock.symbol = position.security.symbol;
+                    stocks.push(stock);
+                });
+                console.log(stocks);
+            });
+        }
+
+        // Compose a query object from the addon options to pass to the API calls.
+        function getQueryFromOptions(options) {
+            return {
+                from: options.dateRangeFilter && options.dateRangeFilter[0],
+                to: options.dateRangeFilter && options.dateRangeFilter[1],
+                groups: options.groupsFilter,
+                institutions: options.institutionsFilter,
+                investments: options.investmentsFilter === 'all' ? null : options.investmentsFilter,
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
