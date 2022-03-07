@@ -3,6 +3,6 @@ use rocket::serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct Stock<'s> {
-    ticker: &'s str,
-    amount: u32,
+    pub ticker: &'s str,
+    pub amount: u32,
 }
