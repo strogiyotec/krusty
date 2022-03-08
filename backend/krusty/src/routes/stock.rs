@@ -1,7 +1,7 @@
-use rocket::serde::json::Json;
+use rocket::{http::Method, serde::json::Json};
+use rocket_cors::{AllowedOrigins, CorsOptions};
 
-//TODO: check that it works
-//TODO: Add excel dependency
+//{Endpoints
 #[post(
     "/report",
     format = "json",
@@ -23,12 +23,28 @@ fn report(
     }
 }
 
+//}
+
+pub fn cors_options() -> CorsOptions {
+    return CorsOptions::default()
+        .allowed_origins(AllowedOrigins::All)
+        .allowed_methods(
+            vec![Method::Get, Method::Post]
+                .into_iter()
+                .map(From::from)
+                .collect(),
+        )
+        .allow_credentials(true);
+}
+
 pub fn stage() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite(
         "JSON",
         |rocket| async {
             rocket
+                .mount("/",rocket_cors::catch_all_options_routes())
                 .mount("/stocks", routes![report])
+                .manage(cors_options().to_cors().unwrap())
         },
     )
 }
