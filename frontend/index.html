@@ -40,10 +40,12 @@
                 //Krusty doesn't care about most fields
                 //For now it's only fetches ticket with amount of stocks
                 let stocks = [];
+                console.log(positions);
                 positions.forEach(function (position) {
                     let stock = {}
                     stock.quantity = position.quantity;
                     stock.symbol = position.security.symbol;
+                    stock.market_value = position.market_value;
                     stocks.push(stock);
                 });
                 console.log(stocks);
