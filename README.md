@@ -1,11 +1,17 @@
 # krusty
-Add on for weathica that exports data into an excel file . Written in Rust 
+Add-on for weathica that exports your investment portfolio into a local Postgres instance. Written in Rust 
 
-# TODO
-1. Write a Rust Http server that will accept data from wealthica
-2. [X] Html page that will prepare data for Rust backend
-3. Create an excel file(maybe import to database ? )
-4. Test it 
-   
-   
-## TODO Backend
+
+## Motivation
+I am using [Wealthsimple](https://www.wealthsimple.com/en-ca) as my Canadian broker. The special thing about Wealthsimple is that it doesn't charge any fees when you are buying stocks from Toronto Exchange. However, the web interface is limited and doesn't provide a comprehensive statistics(stocks you are holding divided by sector or how many dividends you received in last month). To eliminate this problem you can use [Wealthica](https://wealthica.com/) which is a free aggregator website that can show your portfolio from different brokers. Wealthica gives a public API to gather your data.
+
+## Krusty
+Krusty is a add-on + backend written in Rust. The add-on is injected into wealthica and then sends all your data into a Rust based Backend.
+
+## Instructions
+1. Integrate Wealthica with your Wealthsimple account
+2. Add [Wealthica Developer widget](https://github.com/wealthica/wealthica.js)
+3. Configure it to use an url that points to the [frontend page](https://github.com/strogiyotec/krusty/blob/master/frontend/index.html) (Your server that returns this html page has to be configured with https , self signed certificate is good enough)
+4. Press Transactions button to send your portfolio into a Rust backend
+
+
