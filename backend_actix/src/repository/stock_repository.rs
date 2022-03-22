@@ -21,8 +21,18 @@ pub async fn save_stocks(stocks: Vec<Stock>, pool: &Pool<Postgres>) -> Result<()
             .await
             .expect("Can't insert the row");
     }
-    return  tx.commit().await;
+    return tx.commit().await;
 }
+
+pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<Option<String>, Error> {
+    return sqlx::query_as::<_, String>(
+        "select sector from ticker_to_sector where ticket = $1 "
+    )
+        .bind(ticker)
+        .fetch_optional(pool)
+        .await;
+}
+
 
 pub async fn stock_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<DbStock, Error> {
     return sqlx::query_as::<_, DbStock>(

@@ -7,13 +7,13 @@ use crate::router::stock_payload::Stock;
 pub struct DbStock {
     id: i32,
     ticket: String,
-    cnt: i32,
+    cnt: u32,
     sector: String,
-    total_volume: i32,
+    market_value: f64,
 }
 
 impl DbStock {
     pub fn new(payload: Stock, sector: String) -> Self {
-        Self { id: 0, ticket, cnt, sector, total_volume }
+        Self { id: 0, ticket: payload.ticker, cnt: payload.cnt, sector, total_volume:payload.market_value }
     }
 }
