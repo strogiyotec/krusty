@@ -19,6 +19,7 @@ pub struct SuccessMessage {
 }
 
 pub async fn save_stocks_from_wealthica(stocks: Json<Vec<Stock>>, state: Data<AppState>) -> HttpResponse {
+    let 
     return match save_stocks(stocks.into_inner(), &state.db_conn).await {
         Ok(()) => {
             HttpResponse::Ok().json(SuccessMessage { message: "OK".to_string() })

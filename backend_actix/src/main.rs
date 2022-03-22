@@ -1,3 +1,5 @@
+extern crate env_logger;
+
 use std::env;
 use std::io::Error;
 
@@ -6,16 +8,18 @@ use log::log;
 use sqlx::{Pool, Postgres};
 use sqlx::postgres::PgPoolOptions;
 
+use crate::api::unibit_integration::UniBitApi;
 use crate::router::stock_router::save_stocks_from_wealthica;
-extern crate env_logger;
 
 mod router;
 mod entity;
 mod repository;
+mod api;
 
 #[derive(Clone)]
 pub struct AppState {
     pub db_conn: Pool<Postgres>,
+    pub uni_bit_api: UniBitApi,
 }
 
 #[actix_web::main]
@@ -23,6 +27,7 @@ async fn main() -> std::io::Result<()> {
     //{Logger
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     //}
+
     //{Postgres starts
     let db_url = env::var("DATABASE_URL").expect("DB_URL env variable must be present");
     let pool = PgPoolOptions::new()
@@ -30,8 +35,17 @@ async fn main() -> std::io::Result<()> {
         .connect(db_url.as_str())
         .await
         .expect("Database connection failed");
-    let app_state = AppState{db_conn:pool};
     //}
+
+    //{UniBit API
+    let uni_bit_api_token = env::var("UNI_BIT_API_TOKEN").expect("DB_URL env variable must be present");
+    let uni_bit_api = UniBitApi::new(uni_bit_api_token);
+    //}
+
+    //{State
+    let app_state = AppState { db_conn: pool, uni_bit_api };
+    //}
+
     //{start http server
     HttpServer::new(
         move || App::new()
