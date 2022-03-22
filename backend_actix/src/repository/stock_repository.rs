@@ -1,36 +1,58 @@
+use log::info;
 use sqlx::{Error, Pool, Postgres};
 
-use crate::entity::stock_entity::DbStock;
+use crate::entity::stock_entity::{DbStock, TickerToSector};
 use crate::router;
 use crate::router::stock_payload::Stock;
+use crate::router::stock_router::ErrorMessage;
 
 pub async fn save_stocks(stocks: Vec<Stock>, pool: &Pool<Postgres>) -> Result<(), Error> {
     let mut tx = pool.begin().await?;
-    for stock in stocks {
+    for mut stock in stocks {
+        let mut ticker = stock.ticker.clone();
         sqlx::query(
             r#"
             INSERT INTO stock_info ( ticket, cnt, sector, market_value)
              VALUES ($1,$2,$3,$4)
             "#
         )
-            .bind(stock.ticker)
+            .bind(&ticker)
             .bind(stock.cnt)
             .bind("BANK")
             .bind(stock.market_value)
             .execute(&mut *tx)
             .await
             .expect("Can't insert the row");
+        info!("Stock with ticker {} was saved",ticker);
     }
     return tx.commit().await;
 }
 
-pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<Option<String>, Error> {
-    return sqlx::query_as::<_, String>(
-        "select sector from ticker_to_sector where ticket = $1 "
+pub async fn save_sector_to_ticker(ticker: &String, sector: &String, pool: &Pool<Postgres>) -> Result<(), Error> {
+    let result = sqlx::query(
+        r#"
+            INSERT INTO ticker_to_sector (ticker,sector)
+             VALUES ($1,$2)
+        "#
+    )
+        .bind(ticker)
+        .bind(sector)
+        .execute(pool)
+        .await;
+    return match result {
+        Err(err) => Err(err),
+        Ok(_) => Ok(())
+    };
+}
+
+pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<Option<TickerToSector>, ErrorMessage> {
+    let result = sqlx::query_as::<_, TickerToSector>(
+        "select * from ticker_to_sector where ticker = $1 "
     )
         .bind(ticker)
         .fetch_optional(pool)
         .await;
+    return result.map_err(|e| ErrorMessage { message: format!("{:?}", e) })
 }
 
 

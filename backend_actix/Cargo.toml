@@ -8,13 +8,14 @@ edition = "2021"
 [dependencies]
 env_logger = "0.9"
 actix-web = "4"
+openssl = "0.10.28"
 json = "0.12"
 log = "0.4"
 # Json
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 # Http client
-awc = "3.0.0"
+awc = {version = "3.0.0", features = ["openssl"]}
 
 # Postgres
 sqlx = { version = "0.5", features = [ "runtime-actix-native-tls", "postgres" ] }

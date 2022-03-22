@@ -38,7 +38,7 @@ async fn main() -> std::io::Result<()> {
     //}
 
     //{UniBit API
-    let uni_bit_api_token = env::var("UNI_BIT_API_TOKEN").expect("DB_URL env variable must be present");
+    let uni_bit_api_token = env::var("UNI_BIT_API_TOKEN").expect("UNI_BIT_API_TOKEN env variable must be present");
     let uni_bit_api = UniBitApi::new(uni_bit_api_token);
     //}
 
