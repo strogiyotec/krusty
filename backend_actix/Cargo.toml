@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 env_logger = "0.9"
 actix-web = "4"
+actix-cors = "0.6"
 openssl = "0.10.28"
 json = "0.12"
 log = "0.4"

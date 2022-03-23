@@ -2,6 +2,7 @@ extern crate env_logger;
 
 use std::env;
 use std::io::Error;
+use actix_cors::Cors;
 
 use actix_web::{App, HttpServer, middleware, Result, web};
 use log::log;
@@ -45,10 +46,10 @@ async fn main() -> std::io::Result<()> {
     //{State
     let app_state = AppState { db_conn: pool, uni_bit_api };
     //}
-
     //{start http server
     HttpServer::new(
         move || App::new()
+            .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
             .route("/stocks", web::post().to(save_stocks_from_wealthica))
             .app_data(web::Data::new(app_state.clone()))
