@@ -6,3 +6,9 @@ pub struct Stock {
     pub cnt: u32,
     pub market_value: f64,
 }
+
+impl Stock {
+    pub fn to_toronto_exchange(&mut self) {
+        self.ticker += ".TO";
+    }
+}

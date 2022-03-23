@@ -8,13 +8,21 @@ pub struct TickerToSector {
     pub ticker: String,
     pub sector: String,
 }
+
+impl TickerToSector{
+    pub fn new(ticker: String, sector: String) -> Self {
+        Self { ticker, sector }
+    }
+}
+
+
 #[derive(FromRow, Serialize, Deserialize)]
 pub struct DbStock {
-    id: i32,
-    ticket: String,
-    cnt: u32,
-    sector: String,
-    market_value: f64,
+    pub id: i32,
+    pub ticket: String,
+    pub cnt: u32,
+    pub sector: String,
+    pub market_value: f64,
 }
 
 impl DbStock {

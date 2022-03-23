@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Encode, Error};
 
 use crate::AppState;
-use crate::entity::stock_entity::DbStock;
-use crate::repository::stock_repository::{save_stocks, sector_by_ticker, stock_by_ticker};
+use crate::entity::stock_entity::{DbStock, TickerToSector};
+use crate::repository::stock_repository::{save_stocks, save_ticker_to_sector, sector_by_ticker, stock_by_ticker};
 use crate::router::stock_payload::Stock;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -25,20 +25,28 @@ pub async fn save_stocks_from_wealthica(payload: Json<Vec<Stock>>, state: Data<A
     let mut db_stocks: Vec<DbStock> = Vec::with_capacity(stocks.len());
     // Transform the payload into a list of stocks which will be persisted to database
     // get the sector for each individual stock
-    for stock in &stocks {
+    for mut stock in stocks {
+        stock.to_toronto_exchange();
         let ticker_sector = sector_by_ticker(&stock.ticker, &state.db_conn).await.expect("Sector by ticker");
         match ticker_sector {
             None => {
-                let sector = state.uni_bit_api.get_sector_by_ticker(&stock.ticker).await.expect("Ticker by Sector from API");
-                //TODO: save it to database
-                db_stocks.push(DbStock::new(&stock, sector));
+                let sector = state
+                    .uni_bit_api
+                    .get_sector_by_ticker(&stock.ticker)
+                    .await
+                    .expect("Ticker by Sector from API");
+                let clone_sector = sector.clone();
+                save_ticker_to_sector(&stock.ticker,&sector, &state.db_conn)
+                    .await
+                    .expect("Can't save sector to ticker");
+                db_stocks.push(DbStock::new(&stock, clone_sector));
             }
             Some(ticker_sector) => {
                 db_stocks.push(DbStock::new(&stock, ticker_sector.sector));
             }
         }
     }
-    return match save_stocks(stocks, &state.db_conn).await {
+    return match save_stocks(db_stocks, &state.db_conn).await {
         Ok(()) => {
             HttpResponse::Ok().json(SuccessMessage { message: "OK".to_string() })
         }

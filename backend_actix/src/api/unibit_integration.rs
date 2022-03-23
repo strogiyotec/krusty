@@ -3,6 +3,7 @@ use awc::{ClientResponse, Connector};
 use awc::error::SendRequestError;
 use log::{error, info};
 use openssl::ssl::{SslConnector, SslMethod};
+use serde_json::Value;
 
 use crate::router::stock_router::ErrorMessage;
 
@@ -22,21 +23,26 @@ impl UniBitApi {
     pub async fn get_sector_by_ticker(&self, ticker: &String) -> Result<String, ErrorMessage> {
         let client = awc::Client::new();
         let url = format!("https://api.unibit.ai/v2/company/profile?tickers={ticker}&selectedFields=industry,&accessKey={access_key}", access_key = self.api_token, ticker = ticker);
+        println!("{}", url);
         let response = client.get(url)
             .send()
             .await;
         return match response {
             Ok(mut response) => {
                 let response_body = response.json::<serde_json::Value>().await.expect("Can't get json on sector_by_ticket from UniBit API");
-                let sector = response_body.get("result_data")
-                    .unwrap()
-                    .get(ticker)
-                    .unwrap()
-                    .get("industry")
-                    .unwrap()
-                    .as_str()
-                    .unwrap();
-                Ok(sector.to_string())
+                let unknown = &Value::String("UNKNOWN".to_string());
+                let ticker_json = response_body.get("result_data").unwrap().get(ticker);
+                return match ticker_json {
+                    None => Ok("UNKNOWN".to_string()),
+                    Some(ticker_json) =>
+                        Ok(
+                            ticker_json.get("industry")
+                                .unwrap_or(unknown)
+                                .as_str()
+                                .unwrap()
+                                .to_string()
+                        )
+                }
             }
             Err(err) => {
                 error!("Error fetching sector from UniBit [{:?}]",err);

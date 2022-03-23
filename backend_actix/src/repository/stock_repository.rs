@@ -6,29 +6,29 @@ use crate::router;
 use crate::router::stock_payload::Stock;
 use crate::router::stock_router::ErrorMessage;
 
-pub async fn save_stocks(stocks: Vec<Stock>, pool: &Pool<Postgres>) -> Result<(), Error> {
+pub async fn save_stocks(stocks: Vec<DbStock>, pool: &Pool<Postgres>) -> Result<(), Error> {
     let mut tx = pool.begin().await?;
     for mut stock in stocks {
-        let mut ticker = stock.ticker.clone();
+        let mut ticket = stock.ticket.clone();
         sqlx::query(
             r#"
             INSERT INTO stock_info ( ticket, cnt, sector, market_value)
              VALUES ($1,$2,$3,$4)
             "#
         )
-            .bind(&ticker)
+            .bind(&ticket)
             .bind(stock.cnt)
-            .bind("BANK")
+            .bind(stock.sector)
             .bind(stock.market_value)
             .execute(&mut *tx)
             .await
             .expect("Can't insert the row");
-        info!("Stock with ticker {} was saved",ticker);
+        info!("Stock with ticker {} was saved",ticket);
     }
     return tx.commit().await;
 }
 
-pub async fn save_sector_to_ticker(ticker: &String, sector: &String, pool: &Pool<Postgres>) -> Result<(), Error> {
+pub async fn save_ticker_to_sector(ticker: &String, sector : &String, pool: &Pool<Postgres>) -> Result<(), Error> {
     let result = sqlx::query(
         r#"
             INSERT INTO ticker_to_sector (ticker,sector)
