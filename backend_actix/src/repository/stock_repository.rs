@@ -12,7 +12,7 @@ pub async fn save_stocks(stocks: Vec<DbStock>, pool: &Pool<Postgres>) -> Result<
         let mut ticket = stock.ticket.clone();
         sqlx::query(
             r#"
-            INSERT INTO stock_info ( ticket, cnt, sector, market_value)
+            INSERT INTO public.stock_info ( ticket, cnt, sector, market_value)
              VALUES ($1,$2,$3,$4)
             "#
         )
@@ -31,7 +31,7 @@ pub async fn save_stocks(stocks: Vec<DbStock>, pool: &Pool<Postgres>) -> Result<
 pub async fn save_ticker_to_sector(ticker: &String, sector : &String, pool: &Pool<Postgres>) -> Result<(), Error> {
     let result = sqlx::query(
         r#"
-            INSERT INTO ticker_to_sector (ticker,sector)
+            INSERT INTO public.ticker_to_sector (ticker,sector)
              VALUES ($1,$2)
         "#
     )
@@ -47,7 +47,7 @@ pub async fn save_ticker_to_sector(ticker: &String, sector : &String, pool: &Poo
 
 pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<Option<TickerToSector>, ErrorMessage> {
     let result = sqlx::query_as::<_, TickerToSector>(
-        "select * from ticker_to_sector where ticker = $1 "
+        "select * from public.ticker_to_sector where ticker = $1 "
     )
         .bind(ticker)
         .fetch_optional(pool)
@@ -58,7 +58,7 @@ pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<
 
 pub async fn stock_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<DbStock, Error> {
     return sqlx::query_as::<_, DbStock>(
-        "select * from stock_info where ticket = $1 "
+        "select * from public.stock_info where ticket = $1 "
     )
         .bind(ticker)
         .fetch_one(pool)
