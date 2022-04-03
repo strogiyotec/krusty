@@ -8,8 +8,7 @@ pub async fn save_dividends(dividends: Vec<Dividend>, pool: &Pool<Postgres>) -> 
         dividend.to_toronto_exchange();
         sqlx::query(
             r#"
-            INSERT INTO public.dividend_history (id,ticker,net_cash,effective_date)
-             VALUES ($1,$2,$3,TO_DATE($4,'YYYY-MM-DD'))
+            INSERT INTO MM-DD'))
              ON CONFLICT DO NOTHING;
             "#
         )
