@@ -14,4 +14,11 @@ Krusty is a add-on + backend written in Rust. The add-on is injected into wealth
 3. Configure it to use an url that points to the [frontend page](https://github.com/strogiyotec/krusty/blob/master/frontend/index.html) (Your server that returns this html page has to be configured with https , self signed certificate is good enough)
 4. Press Transactions button to send your portfolio into a Rust backend
 
+## How to use 
+The frontend page provides two buttons, one to save all your stocks into the database and another one to get all your dividends
+
+## TODO
+1. [X] Implement dividends button
+2. [ ] Show YAHOO stats for each individual ticker
+
 
