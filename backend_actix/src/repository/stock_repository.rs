@@ -6,6 +6,15 @@ use crate::router;
 use crate::router::stock_payload::Stock;
 use crate::router::stock_router::ErrorMessage;
 
+pub async fn delete_all(pool: &Pool<Postgres>) -> Result<(), Error> {
+    let mut tx = pool.begin().await?;
+    sqlx::query("DELETE from public.stock_info;")
+        .execute(&mut *tx)
+        .await
+        .expect("Can't delete rows");
+    return tx.commit().await;
+}
+
 pub async fn save_stocks(stocks: Vec<DbStock>, pool: &Pool<Postgres>) -> Result<(), Error> {
     let mut tx = pool.begin().await?;
     for mut stock in stocks {
@@ -28,7 +37,7 @@ pub async fn save_stocks(stocks: Vec<DbStock>, pool: &Pool<Postgres>) -> Result<
     return tx.commit().await;
 }
 
-pub async fn save_ticker_to_sector(ticker: &String, sector : &String, pool: &Pool<Postgres>) -> Result<(), Error> {
+pub async fn save_ticker_to_sector(ticker: &String, sector: &String, pool: &Pool<Postgres>) -> Result<(), Error> {
     let result = sqlx::query(
         r#"
             INSERT INTO public.ticker_to_sector (ticker,sector)
@@ -52,7 +61,7 @@ pub async fn sector_by_ticker(ticker: &String, pool: &Pool<Postgres>) -> Result<
         .bind(ticker)
         .fetch_optional(pool)
         .await;
-    return result.map_err(|e| ErrorMessage { message: format!("{:?}", e) })
+    return result.map_err(|e| ErrorMessage { message: format!("{:?}", e) });
 }
 
 

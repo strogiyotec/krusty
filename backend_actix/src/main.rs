@@ -2,15 +2,15 @@ extern crate env_logger;
 
 use std::env;
 use std::io::Error;
-use actix_cors::Cors;
 
+use actix_cors::Cors;
 use actix_web::{App, HttpServer, middleware, Result, web};
 use log::log;
 use sqlx::{Pool, Postgres};
 use sqlx::postgres::PgPoolOptions;
 
 use crate::api::unibit_integration::UniBitApi;
-use crate::router::stock_router::save_stocks_from_wealthica;
+use crate::router::stock_router::{post_dividends, save_stocks_from_wealthica};
 
 mod router;
 mod entity;
@@ -52,6 +52,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
             .route("/stocks", web::post().to(save_stocks_from_wealthica))
+            .route("/dividends", web::post().to(post_dividends))
             .app_data(web::Data::new(app_state.clone()))
     )
         .bind(("127.0.0.1", 8080))?
